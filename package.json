@@ -1,0 +1,23 @@
+{
+  "name": "hotel-booking-backend",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest"
+    
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jest": "^30.4.2",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.23.2"
+  }
+}
