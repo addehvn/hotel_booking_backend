@@ -13,7 +13,6 @@ function auth (req,res,next){
     const decode = jwt.verif(
     token ,
     process.env.JWT_PASSWORD
-
    )
    req.user=decode
   }catch(error){
