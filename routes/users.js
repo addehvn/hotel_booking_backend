@@ -2,7 +2,10 @@ const express = require ('express');
 const router=express.Router();
 const db= require ('../db.js');
 const SignupValidation= require('../middleware/SingupValidation.js');
+const loginValidation = require('../middleware/loginValidation.js');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+require('dotenv').config()
 
 router.post('/signup',SignupValidation,async (req,res,next)=>{
   const {
@@ -45,5 +48,61 @@ router.post('/signup',SignupValidation,async (req,res,next)=>{
     });
 
 });
+
+
+router.post('/login',loginValidation,async(req,res,next)=>{
+
+  const {
+    email,
+    password
+  }=req.body
+
+  
+  const sql=`SELECT * 
+      FROM users
+      WHERE email = ?`
+
+  db.query(sql,[email],async(err,result)=>{
+    if(err){
+      console.log(err)
+      return next(err);
+    };
+
+    
+  if(result.length===0){
+    const error= new Error('email or passwod is incorrect');
+    error.status=401
+    return next(error);
+  };
+
+  const user=result[0];
+
+  const checkPassword= await bcrypt.compare(password,user.password)
+
+    if(!checkPassword){
+      const error = new Error('email or passwod is incorrect');
+      error.status=401;
+      return next(error);
+    }
+    const token=jwt.sign({
+        email:user.email,
+        user_id:user.user_id
+    },
+    process.env.JWT_PASSWORD,
+    {
+      expiresIn:'1h'
+    }
+  );
+
+  res.status(200).json({
+    message:'Account logged in successfully ',
+    token:token
+  });
+  });
+});
+
+
+
+
 
 module.exports=router

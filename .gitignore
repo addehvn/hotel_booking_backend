@@ -1,3 +1,2 @@
-PORT = 3005
-
-JWR_PASSWORD='6287f1a0308e90c8ec7ff654d5105a9a091b6490'
+node_module/
+.env
