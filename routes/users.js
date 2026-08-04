@@ -6,8 +6,9 @@ const loginValidation = require('../middleware/loginValidation.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth.js');
-require('dotenv').config();
 const updateUserValidation=require('../middleware/updateUserValidation.js');
+const isUser=require('../middleware/isUser.js');
+require('dotenv').config();
 
 router.post('/signup',SignupValidation,async (req,res,next)=>{
   const {
@@ -106,7 +107,7 @@ router.post('/login',loginValidation,async(req,res,next)=>{
   });
 });
 
-router.patch('/update/:id',auth,updateUserValidation,async (req,res,next)=>{
+router.patch('/update/:id',auth,isUser,updateUserValidation,async (req,res,next)=>{
 
   const user_id=Number(req.params.id)
 
@@ -174,7 +175,30 @@ router.patch('/update/:id',auth,updateUserValidation,async (req,res,next)=>{
 
       res.status(200).send('account update successfully');
     });
-})
+});
+
+router.delete('/delete/:id',auth,isUser,(req,res,next)=>{ 
+  const user_id=Number(req.params.id);
+
+  const sql=`
+    DELETE from users
+    WHERE user_id=?;
+  `;
+
+  db.query(sql,[user_id],(err,result)=>{
+    if(err){
+      return next(err);
+    };
+    
+    if(result.affectedRows==0){
+      const error=new Error ('user not found');
+      error.status=404;
+      return next(error);
+    };
+
+    res.status(200).send('user deleted successfully');
+  });
+});
 
 
 

@@ -1,4 +1,4 @@
-function updateValidation(req,res,next){
+function updateUserValidation(req,res,next){
  const {
   first_name,
     last_name,
@@ -47,4 +47,4 @@ if(phone_number!==undefined && !phone_numberRegex.test(phone_number)){
 
 }
 
-module.exports=updateValidation 
+module.exports=updateUserValidation 
