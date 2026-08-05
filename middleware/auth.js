@@ -20,8 +20,6 @@ function auth (req,res,next){
     error.status=401;
     return next(error)
   }
-   
-
    next()
 }
 module.exports=auth;

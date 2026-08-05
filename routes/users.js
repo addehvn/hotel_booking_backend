@@ -20,8 +20,6 @@ router.post('/signup',SignupValidation,async (req,res,next)=>{
   }= req.body
  
 
-
-
   const sql=`
     INSERT INTO users (first_name,last_name,email,password,phone_number)
 
@@ -44,17 +42,13 @@ router.post('/signup',SignupValidation,async (req,res,next)=>{
          return next(error);
       };
         return next(err)
-      };
-      
-
-      
+      };  
 
       res.status(201).send('Account created successfully!');
 
     });
 
 });
-
 
 router.post('/login',loginValidation,async(req,res,next)=>{
 
@@ -177,6 +171,7 @@ router.patch('/update/:id',auth,isUser,updateUserValidation,async (req,res,next)
     });
 });
 
+
 router.delete('/delete/:id',auth,isUser,(req,res,next)=>{ 
   const user_id=Number(req.params.id);
 
@@ -198,9 +193,8 @@ router.delete('/delete/:id',auth,isUser,(req,res,next)=>{
 
     res.status(200).send('user deleted successfully');
   });
+  
 });
-
-
 
 
 
