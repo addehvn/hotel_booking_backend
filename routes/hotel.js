@@ -8,7 +8,7 @@ router.get('/allHotels',(req,res,next)=>{
 const search = req.query.search
 
 let sql=`
-  SELECT *
+  SELECT hotel_name,description,location,created_at
   FROM hotels
   WHERE 1=1 
 `;
@@ -25,10 +25,42 @@ db.query(sql,values,(err,result)=>{
     return next(err)
   };
 
+  if(result.length===0){
+      const error = new Error('hotel did not found')
+      error.status=404;
+      return next(error);
+    }
   res.status(200).json({
     message:'all Hotels',
     json : result 
   });
 });
-}) 
+});
+
+router.get('/:id',(req,res,next)=>{
+  const hotel_id=req.params.id;
+  
+  const sql= `
+  SELECT hotel_name,description,location,created_at
+  FROM hotels 
+  WHERE hotel_id=?
+  `;
+
+  db.query(sql,[hotel_id],(err,result)=>{
+
+    if(err){
+      return next(err);
+    };
+
+    if(result.length===0){
+      const error= new Error('hotel did not found')
+      error.status=404;
+      return next(error);
+    };
+
+    res.status(200).json(result);
+  })
+});
+
+
 module.exports=router;
