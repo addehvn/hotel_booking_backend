@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth.js');
 require('dotenv').config();
 const db=require('../db.js');
+const newHotelValidation=require('../middleware/newHotelValidation.js');
 
 router.get('/allHotels',(req,res,next)=>{
 const search = req.query.search
@@ -61,6 +62,34 @@ router.get('/:id',(req,res,next)=>{
     res.status(200).json(result);
   })
 });
+
+router.post('/newHotel',newHotelValidation,(req,res,next)=>{
+  const {
+    hotel_name,
+    description,
+    location,
+  }=req.body;
+const sql=`
+  INSERT INTO hotels( 
+    hotel_name,
+    description,
+    location)
+
+    VALUES (?,?,?);
+`;
+db.query(sql,[hotel_name,description,location],(err,result)=>{
+  if(err){
+    return next(err);
+  };
+
+  
+   res.status(201).json({
+    message: 'hotel created successfully',
+    json:result
+   });
+});
+});
+
 
 
 module.exports=router;
