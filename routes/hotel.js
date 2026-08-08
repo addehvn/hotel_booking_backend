@@ -7,7 +7,7 @@ const newHotelValidation=require('../middleware/newHotelValidation.js');
 const updateHotelValidation=require('../middleware/updateHotelValidation.js')
 
 
-router.get('/allHotels',(req,res,next)=>{
+router.get('/allHotels',auth,(req,res,next)=>{
 const search = req.query.search
 
 let sql=`
@@ -40,7 +40,7 @@ db.query(sql,values,(err,result)=>{
 });
 });
 
-router.get('/:id',(req,res,next)=>{
+router.get('/:id',auth,(req,res,next)=>{
   const hotel_id=req.params.id;
   
   const sql= `
@@ -65,7 +65,7 @@ router.get('/:id',(req,res,next)=>{
   })
 });
 
-router.post('/newHotel',newHotelValidation,(req,res,next)=>{
+router.post('/newHotel',newHotelValidation,auth,(req,res,next)=>{
   const {
     hotel_name,
     description,
@@ -92,8 +92,7 @@ db.query(sql,[hotel_name,description,location],(err,result)=>{
 });
 });
 
-
-router.patch('/update/:id',updateHotelValidation,(req,res,next)=>{
+router.patch('/update/:id',updateHotelValidation,auth,(req,res,next)=>{
 
   const id=req.params.id
 
@@ -150,6 +149,27 @@ router.patch('/update/:id',updateHotelValidation,(req,res,next)=>{
     res.status(200).send('updated successfully')
   });
 });
+
+router.delete('/delete/:id',auth,(req,res,next)=>{
+ 
+ const hotel_id=Number(req.params.id)
+  const sql=`
+  DELETE  from hotels 
+  WHERE hotel_id=?
+ `;
+ db.query(sql,[hotel_id],(err,result)=>{
+  if(err){
+    return next(err);
+  };
+ if (result.affectedRows===0){
+    const error=new Error ('user not found');
+    error.statusCode=403;
+    return next (error);
+ };
+  res.status(201).send('account deleted successfully');
+ });
+});
+
 
 
 module.exports=router;
