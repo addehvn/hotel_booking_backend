@@ -7,8 +7,13 @@ const newHotelValidation=require('../middleware/newHotelValidation.js');
 const updateHotelValidation=require('../middleware/updateHotelValidation.js')
 
 
-router.get('/allHotels',auth,(req,res,next)=>{
+router.get('/allHotels',(req,res,next)=>{
 const search = req.query.search
+const {
+  sort 
+}=req.query
+
+
 
 let sql=`
   SELECT hotel_name,description,location,created_at
@@ -22,6 +27,19 @@ if(search){
   values.push(`%${search}%`)
 };
 
+
+if(sort==='A-Z'){
+  sql += `
+  ORDER BY hotel_name ASC 
+  `;
+  values.push(sort);
+};
+
+if(sort==='Z-A'){
+  sql +=`
+  ORDER BY hotel_name DESC 
+  `
+}
 
 db.query(sql,values,(err,result)=>{
   if(err){
@@ -39,6 +57,10 @@ db.query(sql,values,(err,result)=>{
   });
 });
 });
+
+
+router
+
 
 router.get('/:id',auth,(req,res,next)=>{
   const hotel_id=req.params.id;
@@ -169,7 +191,6 @@ router.delete('/delete/:id',auth,(req,res,next)=>{
   res.status(201).send('account deleted successfully');
  });
 });
-
 
 
 module.exports=router;
