@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth.js');
 require('dotenv').config();
 const db=require('../db.js');
+const isAdmin=require('../middleware/isAdmin.js');
 const newHotelValidation=require('../middleware/newHotelValidation.js');
 const updateHotelValidation=require('../middleware/updateHotelValidation.js')
 
@@ -21,6 +22,7 @@ let sql=`
   WHERE 1=1 
 `;
 
+
 const values=[]
 if(search){
   sql+=`AND hotel_name LIKE ? `
@@ -37,7 +39,7 @@ if(sort==='A-Z'){
 
 if(sort==='Z-A'){
   sql +=`
-  ORDER BY hotel_name DESC 
+  ORDER BY hotel_name DSC 
   `
 }
 
@@ -58,11 +60,7 @@ db.query(sql,values,(err,result)=>{
 });
 });
 
-
-router
-
-
-router.get('/:id',auth,(req,res,next)=>{
+router.get('/:id',(req,res,next)=>{
   const hotel_id=req.params.id;
   
   const sql= `
@@ -87,7 +85,7 @@ router.get('/:id',auth,(req,res,next)=>{
   })
 });
 
-router.post('/newHotel',newHotelValidation,auth,(req,res,next)=>{
+router.post('/newHotel',auth,isAdmin,newHotelValidation,(req,res,next)=>{
   const {
     hotel_name,
     description,
@@ -114,7 +112,7 @@ db.query(sql,[hotel_name,description,location],(err,result)=>{
 });
 });
 
-router.patch('/update/:id',updateHotelValidation,auth,(req,res,next)=>{
+router.patch('/update/:id',auth,isAdmin,updateHotelValidation,(req,res,next)=>{
 
   const id=req.params.id
 
@@ -143,8 +141,10 @@ router.patch('/update/:id',updateHotelValidation,auth,(req,res,next)=>{
   }
  
   for(const fields of allowedColumn){
+    if(req.body[fields]){
     update.push(`${fields}=?`);
     values.push(req.body[fields]);
+    }
   };
   values.push(id);
  
@@ -153,7 +153,7 @@ router.patch('/update/:id',updateHotelValidation,auth,(req,res,next)=>{
 
   const sql=`
   UPDATE hotels
-  SET ${update.join(' , ')} and updated_at= NOW()
+  SET ${update.join(' , ')} , updated_at= NOW()
   WHERE  hotel_id = ?
   `;
 
@@ -172,7 +172,7 @@ router.patch('/update/:id',updateHotelValidation,auth,(req,res,next)=>{
   });
 });
 
-router.delete('/delete/:id',auth,(req,res,next)=>{
+router.delete('/delete/:id',auth,isAdmin,(req,res,next)=>{
  
  const hotel_id=Number(req.params.id)
   const sql=`
@@ -185,7 +185,7 @@ router.delete('/delete/:id',auth,(req,res,next)=>{
   };
  if (result.affectedRows===0){
     const error=new Error ('user not found');
-    error.statusCode=403;
+    error.status=403;
     return next (error);
  };
   res.status(201).send('account deleted successfully');
