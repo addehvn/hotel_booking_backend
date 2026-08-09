@@ -83,5 +83,72 @@ res.status(200).send(result);
 
 });
 
+router.patch('/update/:id',auth,isAdmin,async(req,res,next)=>{
+  const user_id=Number(req.params.id);
+
+  if(req.body.password){
+     req.body.password=await bcrypt.hash(req.body.password,10)
+  }
+
+  const allowedColumns=[
+    'first_name',
+    'last_name',
+    'email',
+    'password',
+    'phone_number'
+  ];
+
+
+  const notAllowedColumns=[
+  'user_id',
+  'role',
+  'created_at',
+  'updated_at'
+  ]
+
+
+  for(const key of notAllowedColumns){
+    if(req.body[key]!==undefined){
+      const error=new Error("you cant update this section");
+      error.status=403;
+      return next(error);
+    };
+  };
+
+
+
+  const updates=[];
+  const values =[];
+
+  for(const fields of allowedColumns){
+    if(req.body[fields]!== undefined){
+    updates.push(`${fields}=?`);
+    values.push(req.body[fields]);}
+
+  }
+  values.push(user_id);
+  
+
+  const sql=`
+  UPDATE  users
+   SET ${updates.join(' , ')} , updated_at=NOW()
+   WHERE user_id=?
+  `;
+
+  db.query(sql,values,(err,result)=>{
+    if(err){
+      return next(err);
+    };
+
+    if(result.affectedRows===0){
+      const error = new Error ('user not found');
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send('user updated successfully');
+  });
+
+})
+
 
 module.exports=router
