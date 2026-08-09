@@ -3,7 +3,8 @@ const router = express.Router();
 const db = require('../db.js');
 const bcrypt=require('bcrypt');
 const jwt=require('jsonwebtoken');
-const isAdmin =require('../middleware/isAdmin.js')
+const isAdmin =require('../middleware/isAdmin.js');
+const auth = require('../middleware/auth.js');
 require('dotenv').config()
 
 router.post('/login',async(req,res,next)=>{
@@ -58,6 +59,28 @@ router.post('/login',async(req,res,next)=>{
       json:token 
     });
   });
+});
+
+router.get('/me/:id',auth,isAdmin,async(req,res,next)=>{
+
+const user_id=req.params.id;
+
+const sql =`
+SELECT * FROM users 
+WHERE user_id=?
+`
+db.query(sql,[user_id],(err,result)=>{
+if(err){
+  return next(err);
+};
+if(result.length===0){
+  const error= new Error('user not found');
+  error.status=404;
+  return next(error);
+};
+res.status(200).send(result);
+});
+
 });
 
 
