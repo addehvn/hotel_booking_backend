@@ -101,6 +101,35 @@ router.post('/login',loginValidation,async(req,res,next)=>{
   });
 });
 
+router.get('/me/:id',auth,isUser,(req,res,next)=>{
+  const user_id=req.params.id;
+  
+
+  const sql=`
+  SELECT 
+    first_name,
+    last_name,
+    email,
+    phone_number
+  FROM users 
+  WHERE user_id=?
+  `;
+
+
+  db.query(sql,[user_id],(err,result)=>{
+
+    if(err){
+      return next(err);
+    };
+    if(result.length===0){
+      const error= new Error('user not found');
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send(result);
+  })
+})
+
 router.patch('/update/:id',auth,isUser,updateUserValidation,async (req,res,next)=>{
 
   const user_id=Number(req.params.id)
