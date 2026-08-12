@@ -4,7 +4,8 @@ const db = require('../db.js');
 const auth =require('../middleware/auth.js');
 const isAdmin=require('../middleware/isAdmin.js');
 const upload =require('../middleware/multer.js')
-
+const updateRoomValidation=require('../middleware/updateRoomValidation.js');
+const newRoomValidation=require('../middleware/newRoomValidation.js');
 
 
 router.get('/hotel/:hotelId/allRooms',(req,res,next)=>{
@@ -62,7 +63,7 @@ router.get('/hotel/:hotelId/room/:roomId',(req,res,next)=>{
 
 });
 
-router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,upload.single('image'),(req,res,next)=>{
+router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,upload.single('image'),updateRoomValidation,(req,res,next)=>{
 
   const hotel_id=Number(req.params.hotelId);
   const room_id=Number(req.params.roomId);
@@ -74,7 +75,6 @@ router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,upload.single('i
     'capacity',
   ];
 
-  const image = req.file?req.file.filename:null;
 
   const notAllowedColumns=[
     'room_id',
@@ -106,7 +106,7 @@ router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,upload.single('i
     if(req.file){
       updates.push('image=?');
       values.push(req.file.filename);
-    }
+    };
      
     if(updates.length===0){
     const error = new Error('no fields to update');
@@ -140,7 +140,7 @@ router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,upload.single('i
   
 });
 
-router.post('/hotel/:hotelId/newRoom',auth,isAdmin,upload.single('image'),(req,res,next)=>{
+router.post('/hotel/:hotelId/newRoom',upload.single('image'),newRoomValidation,(req,res,next)=>{
 
   const hotel_id=req.params.hotelId;
   const {
@@ -171,4 +171,31 @@ router.post('/hotel/:hotelId/newRoom',auth,isAdmin,upload.single('image'),(req,r
   });
 });
 
+route.delete('/hotel/:hotelId/deleteRoom/:roomId',auth,isAdmin,(req,res,next)=>{
+  const hotel_id=req.params.hotelId;
+  const room_id=req.params.roomId;
+
+
+  const sql =`
+  DELETE FROM rooms 
+  WHERE hotel_id=? AND room_id=? 
+  `;
+
+  db.query(sql,[hotel_id,room_id],(err,result)=>{
+
+    if(err){
+      return  next(err)
+    };
+
+    if(result.affectedRows===0){
+      const error = new Error('room not found ');
+      error.status=404;
+      return next(error);
+    };
+
+    res.status(200).send('room deleted successfully');
+  })
+
+
+})
 module.exports=router
