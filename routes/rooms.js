@@ -140,7 +140,7 @@ router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,upload.single('i
   
 });
 
-router.post('/hotel/:hotelId/newRoom',upload.single('image'),newRoomValidation,(req,res,next)=>{
+router.post('/hotel/:hotelId/newRoom',auth,isAdmin,upload.single('image'),newRoomValidation,(req,res,next)=>{
 
   const hotel_id=req.params.hotelId;
   const {
@@ -171,7 +171,7 @@ router.post('/hotel/:hotelId/newRoom',upload.single('image'),newRoomValidation,(
   });
 });
 
-route.delete('/hotel/:hotelId/deleteRoom/:roomId',auth,isAdmin,(req,res,next)=>{
+router.delete('/hotel/:hotelId/deleteRoom/:roomId',auth,isAdmin,(req,res,next)=>{
   const hotel_id=req.params.hotelId;
   const room_id=req.params.roomId;
 
@@ -194,8 +194,9 @@ route.delete('/hotel/:hotelId/deleteRoom/:roomId',auth,isAdmin,(req,res,next)=>{
     };
 
     res.status(200).send('room deleted successfully');
-  })
+  });
 
 
-})
+});
+
 module.exports=router
