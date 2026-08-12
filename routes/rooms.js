@@ -3,6 +3,9 @@ const router = express.Router();
 const db = require('../db.js');
 const auth =require('../middleware/auth.js');
 const isAdmin=require('../middleware/isAdmin.js');
+const upload =require('../middleware/multer.js')
+
+
 
 router.get('/hotel/:hotelId/allRooms',(req,res,next)=>{
   const hotel_id=req.params.hotelId
@@ -59,7 +62,8 @@ router.get('/hotel/:hotelId/room/:roomId',(req,res,next)=>{
 
 });
 
-router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,(req,res,next)=>{
+router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,upload.single('image'),(req,res,next)=>{
+
   const hotel_id=Number(req.params.hotelId);
   const room_id=Number(req.params.roomId);
 
@@ -68,8 +72,9 @@ router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,(req,res,next)=>
     'room_type',
     'price',
     'capacity',
-    'image' 
   ];
+
+  const image = req.file?req.file.filename:null;
 
   const notAllowedColumns=[
     'room_id',
@@ -85,7 +90,7 @@ router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,(req,res,next)=>
 
  
   for(const key of notAllowedColumns){
-    if(req.body[key]!==undefined){
+    if(req.body[key]!==undefined ){
       const error=new Error("you're not allowed to change this column");
       error.status=403;
       return next(error);
@@ -93,11 +98,15 @@ router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,(req,res,next)=>
   };
 
   for(const key of allowedColumns){
-    if(req.body[key]!==undefined){
+    if(req.body[key]!==undefined ){
       updates.push(`${key}=?`);
       values.push(req.body[key]);
     }};
     
+    if(req.file){
+      updates.push('image=?');
+      values.push(req.file.filename);
+    }
      
     if(updates.length===0){
     const error = new Error('no fields to update');
@@ -131,5 +140,35 @@ router.patch('/update/hotel/:hotelId/room/:roomId',auth,isAdmin,(req,res,next)=>
   
 });
 
+router.post('/hotel/:hotelId/newRoom',auth,isAdmin,upload.single('image'),(req,res,next)=>{
+
+  const hotel_id=req.params.hotelId;
+  const {
+      room_type,
+      room_number,
+      price,
+      capacity
+    }=req.body;
+
+    const image=req.file?req.file.filename:null;
+  const sql=`
+  INSERT INTO rooms (
+      hotel_id,
+      room_number,
+      room_type,
+      price,
+      capacity,
+      image
+      )
+    VALUES(?,?,?,?,?,?) 
+  `;
+
+  db.query(sql,[hotel_id,room_number,room_type,price,capacity,image],(err,result)=>{
+    if(err){
+      return next(err);
+    };
+    res.status(201).send('room created succuessfully');
+  });
+});
 
 module.exports=router
