@@ -7,7 +7,10 @@ const isAdmin =require('../middleware/isAdmin.js');
 const auth = require('../middleware/auth.js');
 const updateUserValidation= require('../middleware/updateUserValidation.js');
 const updateHotelValidation= require('../middleware/updateHotelValidation.js');
+const newHotelValidation=require('../middleware/newHotelValidation.js')
 require('dotenv').config();
+
+
 
 router.post('/login',async(req,res,next)=>{
   const {
@@ -63,6 +66,7 @@ router.post('/login',async(req,res,next)=>{
   });
 });
 
+
 router.get('/me/:id',auth,isAdmin,async(req,res,next)=>{
 
 const user_id=req.params.id;
@@ -84,6 +88,7 @@ res.status(200).send(result);
 });
 
 });
+
 
 router.patch('/update/:id',auth,isAdmin,async(req,res,next)=>{
   const user_id=Number(req.params.id);
@@ -153,6 +158,8 @@ router.patch('/update/:id',auth,isAdmin,async(req,res,next)=>{
 });
 
 
+
+
 router.get('/allUsers',auth,isAdmin,(req,res,next)=>{
   
   const search = req.query.search;
@@ -182,6 +189,7 @@ router.get('/allUsers',auth,isAdmin,(req,res,next)=>{
   });
 });
 
+
 router.get('/user/:id',auth,isAdmin,(req,res,next)=>{
  
   const user_id=req.params.id;
@@ -206,6 +214,7 @@ router.get('/user/:id',auth,isAdmin,(req,res,next)=>{
     res.status(200).send(result);
   });
 });
+
 
 router.patch('/user/update/:id',auth,isAdmin,updateUserValidation,async(req,res,next)=>{
   const user_id=req.params.id;
@@ -271,6 +280,8 @@ router.patch('/user/update/:id',auth,isAdmin,updateUserValidation,async(req,res,
 });
 
 
+
+
 router.get('/allHotels',auth,isAdmin,(req,res,next)=>{
   const search = req.query.search;
 
@@ -300,6 +311,60 @@ router.get('/allHotels',auth,isAdmin,(req,res,next)=>{
 
 
 });
+
+
+router.get('/hotel/:id',auth,isAdmin,(req,res,next)=>{
+  const hotel_id=req.params.id;
+
+  const sql = `
+  SELECT * 
+  FROM hotels 
+  WHERE hotel_id=?
+  `;
+
+
+  db.query(sql,[hotel_id],(err,result)=>{
+    if(err){
+      return next (err);
+    };
+
+    if(result.length===0){
+      const error = new Error('hotel did not find');
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send(result);
+  });
+});
+
+
+router.post('/hotel/newHotel',auth,isAdmin,newHotelValidation,(req,res,next)=>{
+  const {
+    hotel_name,
+    description,
+    location,
+  }=req.body;
+const sql=`
+  INSERT INTO hotels( 
+    hotel_name,
+    description,
+    location)
+
+    VALUES (?,?,?);
+`;
+db.query(sql,[hotel_name,description,location],(err,result)=>{
+  if(err){
+    return next(err);
+  };
+
+  
+   res.status(201).json({
+    message: 'hotel created successfully',
+    json:result
+   });
+});
+});
+
 
 router.patch('/hotel/update/:id',auth,isAdmin,updateHotelValidation,(req,res,next)=>{
 
@@ -360,6 +425,7 @@ router.patch('/hotel/update/:id',auth,isAdmin,updateHotelValidation,(req,res,nex
     res.status(200).send('updated successfully')
   });
 });
+
 
 router.delete('/hotel/delete/:id',auth,isAdmin,(req,res,next)=>{
  
