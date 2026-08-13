@@ -270,6 +270,37 @@ router.patch('/user/update/:id',auth,isAdmin,updateUserValidation,async(req,res,
 });
 
 
+router.get('/allHotels',auth,isAdmin,(req,res,next)=>{
+  const search = req.query.search;
+
+  let sql = `
+  SELECT * FROM hotels
+  WHERE 1=1
+  `;
+
+  if(search){
+    sql +=`
+    AND hotel_name LIKE ?
+    `;
+  };
+
+  db.query(sql,[search],(err,result)=>{
+    if(err){
+      return next(err);
+    };
+
+    if(result.length===0){
+      const error = new Error('hotel did not find');
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send(result);
+  });
+
+
+});
+
+
 
 
 
