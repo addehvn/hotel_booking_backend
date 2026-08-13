@@ -5,6 +5,7 @@ const bcrypt=require('bcrypt');
 const jwt=require('jsonwebtoken');
 const isAdmin =require('../middleware/isAdmin.js');
 const auth = require('../middleware/auth.js');
+const updateUserValidation= require('../middleware/updateUserValidation.js');
 require('dotenv').config()
 
 router.post('/login',async(req,res,next)=>{
@@ -150,6 +151,7 @@ router.patch('/update/:id',auth,isAdmin,async(req,res,next)=>{
 
 });
 
+
 router.get('/allUsers',auth,isAdmin,(req,res,next)=>{
   
   const search = req.query.search;
@@ -203,6 +205,71 @@ router.get('/user/:id',auth,isAdmin,(req,res,next)=>{
     res.status(200).send(result);
   });
 });
+
+router.patch('/user/update/:id',auth,isAdmin,updateUserValidation,async(req,res,next)=>{
+  const user_id=req.params.id;
+
+  const allowedColumns=[
+    'first_name',
+    'last_name',
+    'email',
+    'password',
+    'phone_number'
+  ];
+
+
+
+  const notAllowedColumns=[
+    'role',
+    'created_at',
+    'updated_at',
+    'user_id',
+  ];
+
+
+  const updates=[];
+  const values =[];
+
+  for(key of notAllowedColumns){
+    if(req.body[key] !== undefined){
+      const error = new Error("you're not allowed to update this column");
+      error.status=403;
+      return next(error);
+    };
+  };
+
+  if(req.body.password){
+     req.body.password=await bcrypt.hash(req.body.password,10)
+  };
+
+
+  for (key of allowedColumns){
+    if(req.body[key]!==undefined){
+      updates.push(`${key}=?`)
+      values.push(req.body[key])
+    };
+  };
+  values.push(user_id);
+
+  const sql=`
+  UPDATE users
+    SET ${updates.join(', ')}, updated_at=NOW()
+    WHERE user_id=?
+  `
+
+
+  db.query(sql,values,(err,result)=>{
+    if(err){
+      return next(err);
+    };
+    if(result.affectedRows===0){
+      const error = new Error('user did not found')
+    }
+    res.status(200).send('user updated successfully')
+  });
+});
+
+
 
 
 
