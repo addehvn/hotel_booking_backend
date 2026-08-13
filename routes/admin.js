@@ -148,7 +148,62 @@ router.patch('/update/:id',auth,isAdmin,async(req,res,next)=>{
     res.status(200).send('user updated successfully');
   });
 
-})
+});
+
+router.get('/allUsers',auth,isAdmin,(req,res,next)=>{
+  
+  const search = req.query.search;
+  
+  let sql=`
+  SELECT * FROM users 
+  WHERE 1=1
+  `;
+
+  if(search){
+    sql+=`
+    AND first_name like ?
+    `;
+  };
+
+  db.query(sql,[search],(err,result)=>{
+    if(err){
+      return next(err);
+    };
+
+    if(result.length===0){
+      const error = new Error('user doesnt exists');
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send(result);
+  });
+});
+
+router.get('/user/:id',auth,isAdmin,(req,res,next)=>{
+ 
+  const user_id=req.params.id;
+
+  const sql=`
+  SELECT * 
+  FROM users
+  WHERE user_id =?;
+  `;
+
+
+  db.query(sql,[user_id],(err,result)=>{
+    if(err){
+      return next(err);
+    };
+
+    if(result.length===0){
+      const error = new Error('user doesnt exist');
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send(result);
+  });
+});
+
 
 
 module.exports=router
