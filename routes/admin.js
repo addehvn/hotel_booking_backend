@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../db.js');
 const bcrypt=require('bcrypt');
 const jwt=require('jsonwebtoken');
+const upload=require('../middleware/multer.js');
 const isAdmin =require('../middleware/isAdmin.js');
 const auth = require('../middleware/auth.js');
 const updateUserValidation= require('../middleware/updateUserValidation.js');

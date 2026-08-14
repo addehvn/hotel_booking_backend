@@ -16,7 +16,9 @@ app.use('/user',user);
 
 app.use('/hotel',hotel);
 
-app.use('/room',room)
+app.use('/room',room);
+
+
 
 app.use('/admin',admin);
 
