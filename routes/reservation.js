@@ -150,5 +150,26 @@ router.get('/reservationList/:resId/detail',auth,(req,res,next)=>{
     });
 });
 
+router.delete('/:resId/delete',auth,(req,res,next)=>{
+  const res_id=req.params.resId;
+  
+  const sql = `
+  DELETE   FROM reservation
+  WHERE res_id=?
+  AND user_id=?
+  `;
+
+  db.query(sql,[res_id,req.user.user_id],(err,result)=>{
+    if(err){
+      return next(err);
+    };
+    if(result.affectedRows===0){
+      const error = new Error('reservation does not exists');
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send('reservation deleted successfully');
+  });
+});
 
 module.exports=router;
