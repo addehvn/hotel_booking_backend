@@ -3,7 +3,7 @@ const router=express.Router();
 const db=require('../db.js');
 const auth=require('../middleware/auth.js');
 const isUser=require('../middleware/isUser.js');
-router.get('/hotel/:hotelId/room/:roomId/available',(req,res,next)=>{
+router.get('/hotel/:hotelId/room/:roomId/available',auth,(req,res,next)=>{
   const hotel_id=req.params.hotelId;
   const room_id=req.params.roomId;
   const check_in=req.query.checkIn;
@@ -13,6 +13,13 @@ router.get('/hotel/:hotelId/room/:roomId/available',(req,res,next)=>{
         error.status=400;
         return next(error)
       }; 
+
+      if(check_in>=check_out){
+    const error=new Error('check_out must be after check_in');
+    error.status=400;
+    return next(error);
+  };
+
   const sqlHotel=`
     SELECT * FROM rooms
     WHERE room_id =?
@@ -125,4 +132,23 @@ router.post('/hotel/:hotelId/room/:roomId/reservation',auth,(req,res,next)=>{
   })
 
 });
+
+router.get('/reservationList/:resId/detail',auth,(req,res,next)=>{
+  const res_id=req.params.resId;
+  const sql=`
+    SELECT  * 
+    FROM reservation 
+    WHERE res_id=?
+    AND user_id=?
+    `;
+
+    db.query(sql,[res_id,req.user.user_id],(err,result)=>{
+      if(err){
+        return next(err);
+      };
+      res.status(200).send(result);
+    });
+});
+
+
 module.exports=router;
