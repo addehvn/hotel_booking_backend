@@ -13,7 +13,7 @@ function newRoomValidation(req,res,next){
 
   const priceRegex = /^\d{1,4}\.\d{2}$/;
 
-  const capacityRegex= /^[1-9]\d{0,2}$/;
+  const capacityRegex= /^[1-9]\d*$/;
 
   if(!room_typeRegex.test(room_type)){
   const error = new Error('Invalid room type. Allowed types: Single, Double, Twin, Deluxe, Suite');
@@ -33,8 +33,8 @@ if(!priceRegex.test(price)){
   return next(error);
   };
 
-if(!capacityRegex.test(capacity)){
-  const error = new Error('Capacity must be a positive whole number');
+if(!capacityRegex.test(String(capacity))){
+  const error = new Error('Capacity must be a positive number');
   error.status=400;
   return next(error);
   };

@@ -14,7 +14,7 @@ const room_typeRegex= /^(Single|Double|Twin|Deluxe|Suite)$/i;
 
 const priceRegex = /^\d{1,4}\.\d{2}$/;
 
-const capacityRegex= /^[1-9]\d{0,2}$/;
+const capacityRegex= /^[1-9]\d*$/;
 
 
 if(room_number !== undefined && !room_numberRegex.test(room_number)){

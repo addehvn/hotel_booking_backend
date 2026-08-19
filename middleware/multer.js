@@ -1,27 +1,25 @@
 const multer=require('multer');
-
+const path = require('path');
 const storage=multer.diskStorage({
-  destination:(req,File,cb)=>{
-    cb(null,'upload/');
+destination:(req,file,cb)=>{
+  cb(null,'upload/')
   },
-  fileName:(req,file,cb)=>{
-    const uniqueName=
-    Date.now()+
+  filename:(req,file,cb)=>{
+    const uniquename= Date.now()+
     '_'+
-    Math.random(Math.round()*1E20)+
-    Path.extname(file.originalname)
-    cb(null,uniquName)
+    Math.round(Math.random()*1E20)+
+    path.extname(file.originalname);
+    cb(null,uniquename)
+  }});
+  const fileFilter=(req,file,cb)=>{
+    if(file.mimetype.startsWith('image/')){
+      cb(null,true)
+    }else{
+      cb(new Error('only image file are allowed'),false)
+    }
   }
-});
-const fileFilter=multer.fileFilter=(req,file,cb)=>{
-  if(file.mimetype.startsWith('image/')){
-    cb(null,true);
-  }else{
-    cb(new Error ('only image file are allowed'),false);
-  };
-};
-const upload=multer({
-  storage: storage ,
-  fileFilter: fileFilter 
-});
-module.exports= upload 
+  const upload=multer({
+    storage ,
+    fileFilter
+  })
+module.exports=upload 
