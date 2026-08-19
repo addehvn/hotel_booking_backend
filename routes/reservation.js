@@ -133,11 +133,42 @@ router.post('/hotel/:hotelId/room/:roomId/reservation',auth,(req,res,next)=>{
 
 });
 
+router.get('/reservationList/:id',auth,isUser,(req,res,next)=>{
+  const user_id=Number(req.params.id);
+
+  const sql=`
+  SELECT  rm.room_type,r.check_in,r.check_out
+  FROM reservation r
+  JOIN rooms rm
+  ON rm.room_id=r.room_id 
+  WHERE user_id=?
+  `;
+
+  db.query(sql,[user_id],(err,result)=>{
+    if(err){
+      return next(err)
+    };
+    if(result.length===0){
+    const error= new Error('there is no reservation');
+    error.status=401;
+    return next(error);
+    };
+    res.status(200).send(result);
+  });
+});
+
 router.get('/reservationList/:resId/detail',auth,(req,res,next)=>{
   const res_id=req.params.resId;
   const sql=`
-    SELECT  * 
-    FROM reservation 
+    SELECT rm.room_number,
+      rm.room_type,
+      rm.price,
+      rm.image,
+      r.check_in,
+      r.check_out  
+    FROM reservation r  
+    JOIN rooms rm
+    ON rm.room_id=r.room_id
     WHERE res_id=?
     AND user_id=?
     `;
