@@ -15,6 +15,7 @@ require('dotenv').config();
 
 
 
+
 router.post('/login',async(req,res,next)=>{
   const {
     email,
@@ -69,7 +70,6 @@ router.post('/login',async(req,res,next)=>{
   });
 });
 
-
 router.get('/me/:id',auth,isAdmin,async(req,res,next)=>{
 
 const user_id=req.params.id;
@@ -91,7 +91,6 @@ res.status(200).send(result);
 });
 
 });
-
 
 router.patch('/update/:id',auth,isAdmin,async(req,res,next)=>{
   const user_id=Number(req.params.id);
@@ -192,7 +191,6 @@ router.get('/allUsers',auth,isAdmin,(req,res,next)=>{
   });
 });
 
-
 router.get('/user/:id',auth,isAdmin,(req,res,next)=>{
  
   const user_id=req.params.id;
@@ -217,7 +215,6 @@ router.get('/user/:id',auth,isAdmin,(req,res,next)=>{
     res.status(200).send(result);
   });
 });
-
 
 router.patch('/user/update/:id',auth,isAdmin,updateUserValidation,async(req,res,next)=>{
   const user_id=req.params.id;
@@ -315,7 +312,6 @@ router.get('/allHotels',auth,isAdmin,(req,res,next)=>{
 
 });
 
-
 router.get('/hotel/:id',auth,isAdmin,(req,res,next)=>{
   const hotel_id=req.params.id;
 
@@ -339,7 +335,6 @@ router.get('/hotel/:id',auth,isAdmin,(req,res,next)=>{
     res.status(200).send(result);
   });
 });
-
 
 router.post('/hotel/newHotel',auth,isAdmin,newHotelValidation,(req,res,next)=>{
   const {
@@ -367,7 +362,6 @@ db.query(sql,[hotel_name,description,location],(err,result)=>{
    });
 });
 });
-
 
 router.patch('/hotel/update/:id',auth,isAdmin,updateHotelValidation,(req,res,next)=>{
 
@@ -429,7 +423,6 @@ router.patch('/hotel/update/:id',auth,isAdmin,updateHotelValidation,(req,res,nex
   });
 });
 
-
 router.delete('/hotel/delete/:id',auth,isAdmin,(req,res,next)=>{
  
  const hotel_id=Number(req.params.id)
@@ -449,7 +442,6 @@ router.delete('/hotel/delete/:id',auth,isAdmin,(req,res,next)=>{
   res.status(201).send('account deleted successfully');
  });
 });
-
 
 
 
@@ -589,5 +581,60 @@ router.delete('/hotel/:hotelId/deleteRoom/:roomId',auth,isAdmin,(req,res,next)=>
 
 
 });
+
+
+
+
+router.get('/reservation/list',auth,isAdmin,(req,res,next)=>{
+  const filter=req.query.filter;
+  
+  let  sql=`
+    SELECT * 
+    FROM reservation r
+    JOIN rooms rm
+    ON rm.room_id=r.room_id 
+    WHERE 1=1
+  `;
+
+  if(filter){
+    sql += `
+    AND rm.room_type LIKE ?
+    `
+  }
+  db.query(sql,`%${filter}%`,(err,result)=>{
+    if(err){
+      return next(err);
+    };
+    if(result.length===0){
+      const error =new Error('there is no reservation');
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send(result);
+  });
+});
+
+router.get('/reservation/list/:id/detail',auth,isAdmin,(req,res,next)=>{
+  const res_id=req.params.id;
+
+  const sql=`
+    SELECT * 
+    FROM reservation 
+    WHERE res_id=?;
+  `;
+
+  db.query(sql,[res_id],(err,result)=>{
+    if(err){
+      return next(err);
+    };
+    if(result.length===0){
+      const error = new Error("user does'nt have any reservation");
+      error.status=400;
+      return next(error);
+    };
+    res.status(200).send(result);
+  });
+});
+
 
 module.exports=router
