@@ -636,5 +636,56 @@ router.get('/reservation/list/:id/detail',auth,isAdmin,(req,res,next)=>{
   });
 });
 
+router.patch('/reservation/list/:id/detail/update',auth,isAdmin,(req,res,next)=>{
+  const res_id=req.params.id;
+  
+  const allowedColumns=[
+    'check_in',
+    'check_out',
+    'status',
+    'information'
+  ];
 
+  const notAllowedColumns=[
+    'res_id',
+    'user_id',
+    'room_id',
+    'created_at',
+    'updated_at'
+  ];
+  const update=[];
+  const values=[];
+  for (key of notAllowedColumns){
+    if(req.body[key]!==undefined){
+      const error=new Error("you're not allowed to chande this column");
+      error.status=403;
+      return next(error);
+    };
+  };
+  for(key of allowedColumns){
+    if(req.body[key]!==undefined){
+      update.push(`${key}=?`);
+      values.push(req.body[key]);
+    };
+  };
+  values.push(res_id);
+
+
+  const sql=`
+  UPDATE reservation
+  SET ${update.join(', ')} , updated_at = NOW()
+  WHERE res_id=?
+  `;
+  db.query(sql,values,(err,result)=>{
+  if(err){
+    return next(err);
+  };
+  if(result.affectedRows===0){
+    const error = new Error ("reservation does'nt exists");
+    error.status=404;
+    return next(error);
+  };
+  res.status(201).send('reservation updated successfully');
+  });
+});
 module.exports=router
