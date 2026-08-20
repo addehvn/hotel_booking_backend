@@ -181,13 +181,14 @@ router.get('/reservationList/:resId/detail',auth,(req,res,next)=>{
     });
 });
 
-router.delete('/:resId/delete',auth,(req,res,next)=>{
+router.patch('/reservationList/:resId/cancel',auth,isUser,(req,res,next)=>{
   const res_id=req.params.resId;
   
   const sql = `
-  DELETE   FROM reservation
-  WHERE res_id=?
-  AND user_id=?
+    UPDATE reservation
+    SET status='cancel'
+    WHERE res_id=?
+    AND user_id=?
   `;
 
   db.query(sql,[res_id,req.user.user_id],(err,result)=>{
@@ -199,8 +200,9 @@ router.delete('/:resId/delete',auth,(req,res,next)=>{
       error.status=404;
       return next(error);
     };
-    res.status(200).send('reservation deleted successfully');
+    res.status(200).send('reservation cancelled successfully');
   });
 });
+
 
 module.exports=router;
