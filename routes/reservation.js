@@ -157,7 +157,7 @@ router.get('/reservationList/:id',auth,isUser,(req,res,next)=>{
   });
 });
 
-router.get('/reservationList/:resId/detail',auth,(req,res,next)=>{
+router.get('/reservationList/:resId/detail',auth,isUser,(req,res,next)=>{
   const res_id=req.params.resId;
   const sql=`
     SELECT rm.room_number,
@@ -169,8 +169,8 @@ router.get('/reservationList/:resId/detail',auth,(req,res,next)=>{
     FROM reservation r  
     JOIN rooms rm
     ON rm.room_id=r.room_id
-    WHERE res_id=?
-    AND user_id=?
+    WHERE r.res_id=?
+    AND r.user_id=?
     `;
 
     db.query(sql,[res_id,req.user.user_id],(err,result)=>{
