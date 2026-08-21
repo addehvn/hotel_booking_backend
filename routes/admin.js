@@ -688,4 +688,24 @@ router.patch('/reservation/list/:id/detail/update',auth,isAdmin,(req,res,next)=>
   res.status(201).send('reservation updated successfully');
   });
 });
+
+router.delete('/reservation/list/:id/delete',(req,res,next)=>{
+  const res_id=req.params.id;
+  
+  const sql=`
+  DELETE FROM reservation 
+  WHERE res_id=?
+  `;
+  db.query(sql,[res_id],(err,result)=>{
+    if(err){
+      return next(err); 
+    };
+    if(result.affectedRows===0){
+      const error=new Error("reservation does'nt");
+      error.status=404;
+      return next(error);
+    };
+    res.status(200).send('reservation deleted successfully');
+  });
+});
 module.exports=router
