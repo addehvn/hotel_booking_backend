@@ -273,7 +273,7 @@ router.patch('/user/update/:id',auth,isAdmin,updateUserValidation,async(req,res,
       return next(err);
     };
     if(result.affectedRows===0){
-      const error = new Error('user did not found')
+      const error = new Error('user  not found')
     }
     res.status(200).send('user updated successfully')
   });
@@ -302,7 +302,7 @@ router.get('/allHotels',auth,isAdmin,(req,res,next)=>{
     };
 
     if(result.length===0){
-      const error = new Error('hotel did not find');
+      const error = new Error('hotel  not find');
       error.status=404;
       return next(error);
     };
@@ -328,7 +328,7 @@ router.get('/hotel/:id',auth,isAdmin,(req,res,next)=>{
     };
 
     if(result.length===0){
-      const error = new Error('hotel did not find');
+      const error = new Error('hotel  not find');
       error.status=404;
       return next(error);
     };
@@ -414,7 +414,7 @@ router.patch('/hotel/update/:id',auth,isAdmin,updateHotelValidation,(req,res,nex
     };
 
     if(result.affectedRows===0){
-      const error = new Error('hotel did not found');
+      const error = new Error('hotel  not found');
       error.status=404;
       return next(error);
     };

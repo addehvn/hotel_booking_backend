@@ -49,7 +49,7 @@ db.query(sql,values,(err,result)=>{
   };
 
   if(result.length===0){
-      const error = new Error('hotel did not found')
+      const error = new Error('hotel not found')
       error.status=404;
       return next(error);
     }
@@ -76,7 +76,6 @@ router.get('/:id',(req,res,next)=>{
     };
 
     if(result.length===0){
-      const error= new Error('hotel did not found')
       error.status=404;
       return next(error);
     };
