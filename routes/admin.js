@@ -689,7 +689,7 @@ router.patch('/reservation/list/:id/detail/update',auth,isAdmin,(req,res,next)=>
   });
 });
 
-router.delete('/reservation/list/:id/delete',(req,res,next)=>{
+router.delete('/reservation/list/:id/delete',auth , isAdmin,(req,res,next)=>{
   const res_id=req.params.id;
   
   const sql=`
