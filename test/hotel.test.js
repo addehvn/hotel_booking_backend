@@ -36,10 +36,11 @@ describe('hotel details test',()=>{
     expect(response.statusCode).toBe(200);
   });
 
-  test('show hotel details successfully',async()=>{
+  test("show hotel details does not exist",async()=>{
     const response = await request (app)
     .get('/hotel/1');
     expect(response.statusCode).toBe(404);
   });
   
-})
+});
+
