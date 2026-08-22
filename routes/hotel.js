@@ -4,15 +4,10 @@ const auth = require('../middleware/auth.js');
 require('dotenv').config();
 const db=require('../db.js');
 const isAdmin=require('../middleware/isAdmin.js');
-const newHotelValidation=require('../middleware/newHotelValidation.js');
-const updateHotelValidation=require('../middleware/updateHotelValidation.js')
-
 
 router.get('/allHotels',(req,res,next)=>{
 const search = req.query.search
-const {
-  sort 
-}=req.query
+const sort=req.query.sort
 
 
 
@@ -76,6 +71,7 @@ router.get('/:id',(req,res,next)=>{
     };
 
     if(result.length===0){
+      const error = new Error('hotel does not exists');
       error.status=404;
       return next(error);
     };
@@ -83,10 +79,6 @@ router.get('/:id',(req,res,next)=>{
     res.status(200).json(result);
   })
 });
-
-
-
-
 
 
 module.exports=router;
